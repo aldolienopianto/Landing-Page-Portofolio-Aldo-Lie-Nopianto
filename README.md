@@ -23,12 +23,8 @@ Built with a focus on clean typography, responsive layout, and real-time interac
 
 ## 🚀 Running Locally
 
-1. **Clone the repository**
-   ```bash
-   git clone [https://github.com/aldolienopianto/NAMA-REPO-ANDA.git](https://github.com/aldolienopianto/NAMA-REPO-ANDA.git)
    👤 Author
 Aldo Lie Nopianto — Founder of Lieal Corporation
-
 Website: aldolienopianto.com
 GitHub: @aldolienopianto
 © 2026 Aldo Lie Nopianto. All rights reserved.
