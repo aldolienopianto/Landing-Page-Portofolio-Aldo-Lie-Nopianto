@@ -244,8 +244,8 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         // --- CONFIGURATION ---
         const isMobile = window.innerWidth < 768;
         const CONFIG = {
-            particleCount: isMobile ? 18000 : 120000,
-            cameraZ: isMobile ? 32 : 28,
+            particleCount: isMobile ? 65000 : 120000,
+            cameraZ: isMobile ? 40 : 28,
             bgColor: 0x030305
         };
 
@@ -506,12 +506,12 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
                 }
 
                 vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                gl_PointSize = max(2.0, (1.8 + aRandom.y * 2.2 + uAudio * 5.0) * (32.0 / -mvPosition.z));
+                gl_PointSize = (1.5 + aRandom.y * 2.0 + uAudio * 5.0) * (30.0 / -mvPosition.z);
                 gl_Position = projectionMatrix * mvPosition;
                 
                 vDist = length(pos);
-                float depthFade = smoothstep(80.0, 10.0, -mvPosition.z);
-                vAlpha = depthFade * (0.35 + aRandom.z * 0.65);
+                float depthFade = smoothstep(60.0, 10.0, -mvPosition.z);
+                vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
                 vColor = pos; 
             }
         `;
@@ -727,20 +727,13 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
             STATE.hands.right.target.set(x * 30, y * 20, 0);
         });
 
-        window.addEventListener('touchmove', (e) => {
-            if (STATE.hands.active || !e.touches[0]) return;
-            const x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-            const y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-            STATE.hands.right.target.set(x * 25, y * 18, 0);
-        }, { passive: true });
-
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
             
-            CONFIG.cameraZ = window.innerWidth < 768 ? 32 : 28;
+            CONFIG.cameraZ = window.innerWidth < 768 ? 40 : 28;
         });
 
         // --- ANIMATION LOOP ---
@@ -801,3 +794,6 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     </script>
 
 </body></html>
+```[cite: 3]
+
+*(Catatan: Riwayat lengkap versi kode ini juga otomatis tersimpan aman di tab **History / Commits** pada repositori GitHub Anda, sehingga kapan pun bisa dilihat atau dikembalikan hanya dengan sekali klik.)*
