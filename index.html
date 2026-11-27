@@ -136,25 +136,25 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     </header>
 
     <!-- NEW HERO SECTION -->
-    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none px-6">
+    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none px-5 pb-28 md:pb-0">
         <div class="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto">
-            <h1 class="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-2 leading-[1.1]">
+            <h1 class="text-3xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-2 leading-[1.1]">
                 Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
             </h1>
-            <p class="mt-6 text-base sm:text-lg md:text-xl text-white/60 max-w-2xl font-medium leading-relaxed tracking-tight">
+            <p class="mt-3 md:mt-6 text-xs sm:text-lg md:text-xl text-white/60 max-w-2xl font-medium leading-relaxed tracking-tight">
                 I’m Aldo—combining risk &amp; product strategy, web and visual media design, programming, and quality control to build resilient digital solutions. Founder of <a href="https://lieal.com" target="_blank" rel="noopener noreferrer" class="text-white/90 underline decoration-white/30 hover:decoration-white transition-colors pointer-events-auto">Lieal Corporation</a>.
             </p>
-            <div class="mt-10 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto pointer-events-auto">
+            <div class="mt-5 md:mt-10 flex flex-row items-center justify-center gap-3 md:gap-4 w-full sm:w-auto pointer-events-auto">
                 <!-- Portfolio Button -->
-                <button class="group relative px-6 py-3.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/5 transition-all duration-300 flex items-center gap-2.5 overflow-hidden shadow-lg shadow-black/20">
-                    <span class="text-sm font-medium text-white/90">View Portfolio</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-white/70 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+                <button class="group relative px-4 py-2.5 md:px-6 md:py-3.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/5 transition-all duration-300 flex items-center gap-2 overflow-hidden shadow-lg shadow-black/20">
+                    <span class="text-xs md:text-sm font-medium text-white/90">View Portfolio</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 md:w-4 md:h-4 text-white/70 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
                     <!-- Shine Effect -->
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 </button>
                 
                 <!-- Contact Button -->
-                <button class="px-8 py-3.5 rounded-full border border-orange-500/40 text-white/80 hover:text-white hover:bg-orange-500/5 hover:border-orange-500/70 transition-all duration-300 text-sm font-medium shadow-[0_0_15px_-5px_rgba(249,115,22,0.15)] hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)]">
+                <button class="px-5 py-2.5 md:px-8 md:py-3.5 rounded-full border border-orange-500/40 text-white/80 hover:text-white hover:bg-orange-500/5 hover:border-orange-500/70 transition-all duration-300 text-xs md:text-sm font-medium shadow-[0_0_15px_-5px_rgba(249,115,22,0.15)] hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)]">
                     Contact Me
                 </button>
             </div>
@@ -165,11 +165,11 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     <video id="input-video" class="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none z-[-1]" playsinline=""></video>
 
     <!-- UI: Bottom Controls Area -->
-    <div class="absolute bottom-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex flex-col md:flex-row justify-between items-end gap-4">
+    <div class="absolute bottom-0 left-0 w-full z-20 pointer-events-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-6 flex flex-row justify-between items-center md:items-end gap-2 md:gap-4">
         
         <!-- Left: Mode Selector -->
-        <div class="sci-panel p-3 rounded-xl pointer-events-auto w-full md:w-64 max-w-[300px] backdrop-blur-xl border border-white/5">
-            <div class="flex justify-between items-center mb-3 px-1">
+        <div class="sci-panel p-1.5 md:p-3 rounded-xl pointer-events-auto flex-1 md:flex-none md:w-64 md:max-w-[300px] backdrop-blur-xl border border-white/5">
+            <div class="hidden md:flex justify-between items-center mb-3 px-1">
                 <div class="flex items-center gap-2">
                     <i data-lucide="cpu" class="w-3 h-3 text-white/40"></i>
                     <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
@@ -181,34 +181,34 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 gap-1.5">
-                <button onclick="window.setMode(0)" class="mode-btn active group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-left">
+            <div class="grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-1.5">
+                <button onclick="window.setMode(0)" class="mode-btn active group relative flex items-center justify-center md:justify-between px-1.5 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-center md:text-left">
                     <span class="text-[10px] text-white/80 group-hover:text-white font-medium">Nebula</span>
-                    <span class="text-[9px] font-mono text-white/30">01</span>
+                    <span class="hidden md:inline text-[9px] font-mono text-white/30">01</span>
                     <div class="absolute inset-0 border border-white/10 rounded-lg opacity-0 group-[.active]:opacity-100 pointer-events-none"></div>
                 </button>
-                <button onclick="window.setMode(1)" class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+                <button onclick="window.setMode(1)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1.5 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left">
                     <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
-                    <span class="text-[9px] font-mono text-white/20">02</span>
+                    <span class="hidden md:inline text-[9px] font-mono text-white/20">02</span>
                 </button>
-                <button onclick="window.setMode(2)" class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+                <button onclick="window.setMode(2)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1.5 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left">
                     <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
-                    <span class="text-[9px] font-mono text-white/20">03</span>
+                    <span class="hidden md:inline text-[9px] font-mono text-white/20">03</span>
                 </button>
-                <button onclick="window.setMode(3)" class="mode-btn group relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+                <button onclick="window.setMode(3)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1.5 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left">
                     <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Vortex</span>
-                    <span class="text-[9px] font-mono text-white/20">04</span>
+                    <span class="hidden md:inline text-[9px] font-mono text-white/20">04</span>
                 </button>
             </div>
         </div>
 
         <!-- Right: Color & Info -->
-        <div class="flex flex-row md:flex-col items-center md:items-end gap-3 pointer-events-auto">
+        <div class="flex flex-row md:flex-col items-center md:items-end gap-3 pointer-events-auto shrink-0">
             <!-- Palette Switcher -->
-            <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-2">
-                <button onclick="window.cycleColor(0)" class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
-                <button onclick="window.cycleColor(1)" class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
-                <button onclick="window.cycleColor(2)" class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
+            <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-1.5 md:gap-2">
+                <button onclick="window.cycleColor(0)" class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300" aria-label="Color Purple"></button>
+                <button onclick="window.cycleColor(1)" class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300" aria-label="Color Cyan"></button>
+                <button onclick="window.cycleColor(2)" class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300" aria-label="Color Orange"></button>
             </div>
             
             <div class="hidden md:block text-[9px] font-mono text-right text-white/30 leading-tight">
@@ -244,8 +244,8 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
         // --- CONFIGURATION ---
         const isMobile = window.innerWidth < 768;
         const CONFIG = {
-            particleCount: isMobile ? 65000 : 120000,
-            cameraZ: isMobile ? 40 : 28,
+            particleCount: isMobile ? 18000 : 120000,
+            cameraZ: isMobile ? 35 : 28,
             bgColor: 0x030305
         };
 
@@ -353,6 +353,7 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
             uniform float uHandLeftState;
             uniform float uHandRightState;
             uniform float uAudio;
+            uniform float uMobileOffsetY;
             
             attribute vec3 aRandom;
             attribute float aIndex;
@@ -484,6 +485,7 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
                 else pos = pVortex;
 
                 pos *= (1.0 + uAudio * 0.4);
+                pos.y += uMobileOffsetY;
 
                 if (uHandLeft.x > -90.0) {
                     float d = distance(pos, uHandLeft);
@@ -506,12 +508,12 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
                 }
 
                 vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                gl_PointSize = (1.5 + aRandom.y * 2.0 + uAudio * 5.0) * (30.0 / -mvPosition.z);
+                gl_PointSize = max(2.0, (1.8 + aRandom.y * 2.2 + uAudio * 5.0) * (32.0 / -mvPosition.z));
                 gl_Position = projectionMatrix * mvPosition;
                 
                 vDist = length(pos);
-                float depthFade = smoothstep(60.0, 10.0, -mvPosition.z);
-                vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
+                float depthFade = smoothstep(80.0, 10.0, -mvPosition.z);
+                vAlpha = depthFade * (0.35 + aRandom.z * 0.65);
                 vColor = pos; 
             }
         `;
@@ -567,6 +569,7 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
                 uHandLeftState: { value: 0 },
                 uHandRightState: { value: 0 },
                 uAudio: { value: 0 },
+                uMobileOffsetY: { value: isMobile ? 4.5 : 0.0 },
                 uColor1: { value: palettes[0].c1 },
                 uColor2: { value: palettes[0].c2 }
             },
@@ -727,13 +730,22 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
             STATE.hands.right.target.set(x * 30, y * 20, 0);
         });
 
+        window.addEventListener('touchmove', (e) => {
+            if (STATE.hands.active || !e.touches[0]) return;
+            const x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+            const y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+            STATE.hands.right.target.set(x * 25, y * 18 + 4.5, 0);
+        }, { passive: true });
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             composer.setSize(window.innerWidth, window.innerHeight);
             
-            CONFIG.cameraZ = window.innerWidth < 768 ? 40 : 28;
+            const mobileNow = window.innerWidth < 768;
+            CONFIG.cameraZ = mobileNow ? 35 : 28;
+            material.uniforms.uMobileOffsetY.value = mobileNow ? 4.5 : 0.0;
         });
 
         // --- ANIMATION LOOP ---
@@ -794,6 +806,3 @@ animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     </script>
 
 </body></html>
-```[cite: 3]
-
-*(Catatan: Riwayat lengkap versi kode ini juga otomatis tersimpan aman di tab **History / Commits** pada repositori GitHub Anda, sehingga kapan pun bisa dilihat atau dikembalikan hanya dengan sekali klik.)*
