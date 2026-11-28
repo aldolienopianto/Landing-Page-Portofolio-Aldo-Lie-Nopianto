@@ -107,6 +107,17 @@ tailwind.config = {
     .hero-copy  { font-size: clamp(1rem, min(2.4vw, 2.6vh), 1.25rem); }
   }
 
+  /* Hero: centered when it fits, scrollable (never clipped) when it does not */
+  .hero-main { overflow-y: auto; overflow-x: hidden; pointer-events: auto; touch-action: pan-y; scrollbar-width: none; }
+  .hero-main::-webkit-scrollbar { display: none; }
+  .hero-inner { margin-top: auto; margin-bottom: auto; }
+
+  /* Small portrait phones (toolbars eat height): tighter spacing, same stacked layout */
+  @media (max-height: 640px) and (orientation: portrait) {
+    .hero-copy { margin-top: 0.5rem !important; }
+    .hero-actions { margin-top: 1rem !important; }
+  }
+
   .btn-icon { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .btn-icon:active { transform: scale(0.95); }
 
@@ -130,15 +141,14 @@ tailwind.config = {
      animation. The Simulation panel and palette move behind a toggle button
      in the header, and the footer leaves the layout flow entirely. */
   .short-only { display: none; }
-  @media (max-height: 560px) {
+  @media (max-height: 560px) and (orientation: landscape) {
     .short-only { display: flex !important; }
     .ui-header { padding-top: max(0.5rem, env(safe-area-inset-top)) !important; padding-bottom: 0.25rem !important; }
     .ui-sub { display: none !important; }
     .ui-header button { width: 2rem !important; height: 2rem !important; }
     /* Two columns: headline + buttons on the left, description on the right.
        Halves the height needed, so the description is never dropped. */
-    .hero-main { padding-bottom: 2.75rem !important; justify-content: flex-start !important;
-                 overflow-y: auto !important; pointer-events: auto; touch-action: pan-y; }
+    .hero-main { padding-bottom: 2.75rem !important; }
     .hero-inner { display: grid !important; grid-template-columns: 1.1fr 1fr; grid-template-areas: "title copy" "actions copy";
                   column-gap: 1.75rem; row-gap: 0.75rem; align-items: center; text-align: left !important;
                   max-width: 56rem !important; width: 100%; margin-top: auto !important; margin-bottom: auto !important; }
@@ -228,7 +238,7 @@ tailwind.config = {
     </header>
 
     <!-- Hero: fills the space between header and controls, content is centered in it -->
-    <main class="hero-main flex-1 min-h-0 flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden">
+    <main class="hero-main flex-1 min-h-0 flex flex-col items-center px-5 sm:px-6">
       <div class="hero-inner flex flex-col items-center text-center max-w-5xl mx-auto">
         <h2 class="hero-title font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-1 leading-[1.12]">
           Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
