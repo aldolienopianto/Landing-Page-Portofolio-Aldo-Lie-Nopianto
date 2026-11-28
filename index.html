@@ -135,7 +135,7 @@ tailwind.config = {
     .ui-header button { width: 2rem !important; height: 2rem !important; }
     /* Two columns: headline + buttons on the left, description on the right.
        Halves the height needed, so the description is never dropped. */
-    .hero-main { padding-bottom: 1.5rem !important; justify-content: flex-start !important;
+    .hero-main { padding-bottom: 2.75rem !important; justify-content: flex-start !important;
                  overflow-y: auto !important; pointer-events: auto; touch-action: pan-y; }
     .hero-inner { display: grid !important; grid-template-columns: 1.1fr 1fr; grid-template-areas: "title copy" "actions copy";
                   column-gap: 1.75rem; row-gap: 0.75rem; align-items: center; text-align: left !important;
@@ -150,9 +150,11 @@ tailwind.config = {
     .ui-bottom { position: absolute !important; left: env(safe-area-inset-left); right: env(safe-area-inset-right); bottom: 0;
                  flex-direction: row !important; align-items: flex-end !important; justify-content: space-between !important;
                  padding-top: 0 !important; padding-bottom: max(0.4rem, env(safe-area-inset-bottom)) !important; }
-    .mode-panel, .palette { display: none !important; }
+    .mode-panel { display: none !important; }
     #ui.controls-open .mode-panel { display: block !important; width: auto !important; max-width: none !important; padding: 0.4rem 0.5rem !important; }
-    #ui.controls-open .palette { display: flex !important; flex-direction: row !important; }
+    /* Palette stays visible (small) so colors can always be changed */
+    .palette { flex-direction: row !important; padding: 0.3rem 0.45rem !important; gap: 0.45rem !important; }
+    .palette button { width: 1.25rem !important; height: 1.25rem !important; }
     .mode-head { margin-bottom: 0.25rem !important; }
     .mode-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
     .mode-btn { justify-content: center !important; padding: 0.35rem 0.75rem !important; }
