@@ -108,7 +108,7 @@ tailwind.config = {
   .btn-icon { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .btn-icon:active { transform: scale(0.95); }
 
-  /* Animations (previously referenced but not defined) */
+  /* Animations */
   @keyframes pulse-ring {
     0%   { transform: scale(0.8); opacity: 0.5; }
     100% { transform: scale(2.2); opacity: 0; }
@@ -120,47 +120,48 @@ tailwind.config = {
     animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   }
 
-
   /* Notch / rounded-corner safe areas (important in landscape) */
   #ui { box-sizing: border-box; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 
-  /* Short screens (phones in landscape): nothing may cover the headline or the
-     animation. The Simulation panel and palette move behind a toggle button
-     in the header, and the footer leaves the layout flow entirely. */
-  .short-only { display: none; }
-  @media (max-height: 560px) {
-    .short-only { display: flex !important; }
-    .ui-header { padding-top: max(0.5rem, env(safe-area-inset-top)) !important; padding-bottom: 0.25rem !important; }
-    .ui-sub { display: none !important; }
-    .ui-header button { width: 2rem !important; height: 2rem !important; }
-    /* Two columns: headline + buttons on the left, description on the right.
-       Halves the height needed, so the description is never dropped. */
-    .hero-main { padding-bottom: 2.75rem !important; justify-content: flex-start !important;
-                 overflow-y: auto !important; pointer-events: auto; touch-action: pan-y; }
-    .hero-inner { display: grid !important; grid-template-columns: 1.1fr 1fr; grid-template-areas: "title copy" "actions copy";
-                  column-gap: 1.75rem; row-gap: 0.75rem; align-items: center; text-align: left !important;
-                  max-width: 56rem !important; width: 100%; margin-top: auto !important; margin-bottom: auto !important; }
-    .hero-title { grid-area: title; align-self: end; font-size: clamp(1.1rem, 6.4vh, 2rem) !important; padding-bottom: 0 !important; }
+  /* Short screens (phones in landscape, small windows): compact layout */
+  @media (max-height: 520px) {
+    .ui-header {
+      padding-top: max(0.4rem, env(safe-area-inset-top)) !important;
+      padding-bottom: 0 !important;
+    }
+    .hero-title {
+      font-size: clamp(1.1rem, 5.5vh, 1.75rem) !important;
+      line-height: 1.1 !important;
+      padding-bottom: 0 !important;
+    }
     .hero-title br { display: none !important; }
-    .hero-copy { grid-area: copy; align-self: center; font-size: clamp(0.7rem, 3.4vh, 0.85rem) !important; margin-top: 0 !important; line-height: 1.5 !important; max-width: none !important; }
-    .hero-actions { grid-area: actions; align-self: start; justify-content: flex-start !important; margin-top: 0 !important; }
-    .hero-actions button { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-
-    /* Footer floats at the bottom edge and takes no layout space */
-    .ui-bottom { position: absolute !important; left: env(safe-area-inset-left); right: env(safe-area-inset-right); bottom: 0;
-                 flex-direction: row !important; align-items: flex-end !important; justify-content: space-between !important;
-                 padding-top: 0 !important; padding-bottom: max(0.4rem, env(safe-area-inset-bottom)) !important; }
-    .mode-panel { display: none !important; }
-    #ui.controls-open .mode-panel { display: block !important; width: auto !important; max-width: none !important; padding: 0.4rem 0.5rem !important; }
-    /* Palette stays visible (small) so colors can always be changed */
-    .palette { flex-direction: row !important; padding: 0.3rem 0.45rem !important; gap: 0.45rem !important; }
-    .palette button { width: 1.25rem !important; height: 1.25rem !important; }
-    .mode-head { margin-bottom: 0.25rem !important; }
-    .mode-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-    .mode-btn { justify-content: center !important; padding: 0.35rem 0.75rem !important; }
+    .hero-copy { display: none !important; }
+    .hero-actions { margin-top: 0.6rem !important; gap: 0.5rem !important; }
+    .hero-actions button {
+      padding: 0.4rem 1rem !important;
+      font-size: 0.75rem !important;
+    }
+    .ui-bottom {
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding-top: 0 !important;
+      padding-bottom: max(0.4rem, env(safe-area-inset-bottom)) !important;
+    }
+    .mode-panel {
+      width: auto !important;
+      max-width: none !important;
+      padding: 0.25rem 0.4rem !important;
+    }
+    .mode-head { display: none !important; }
+    .mode-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 0.25rem !important; }
+    .mode-btn { justify-content: center !important; padding: 0.25rem 0.6rem !important; }
     .mode-num, .copy-extra { display: none !important; }
-    .side-col { flex-direction: row !important; align-items: center !important; justify-content: flex-end !important; gap: 0.75rem !important; margin-left: auto; }
+    .side-col { flex-direction: row !important; align-items: center !important; justify-content: flex-end !important; gap: 0.5rem !important; }
+    .palette { flex-direction: row !important; padding: 0.25rem !important; gap: 0.35rem !important; }
+    .palette button { width: 1.1rem !important; height: 1.1rem !important; }
   }
+
   @media (prefers-reduced-motion: reduce) {
     .loader-ring { animation: none; }
   }
@@ -190,16 +191,13 @@ tailwind.config = {
           </div>
           <h1 class="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90 truncate">ALDOLIENOPIANTO<span class="opacity-40">.COM</span></h1>
         </div>
-        <div class="ui-sub flex items-center text-[10px] font-mono text-sci-dim tracking-wider">
+        <div class="flex items-center text-[10px] font-mono text-sci-dim tracking-wider">
           <span class="text-white/70">STRATEGY • DESIGN • ENGINEERING</span>
           <span id="sim-mode" class="hidden">NEBULA CLOUD</span>
         </div>
       </div>
 
       <div class="flex gap-2 pointer-events-auto shrink-0">
-        <button id="btn-controls" class="short-only sci-panel w-9 h-9 items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group" aria-label="Simulation controls" aria-expanded="false">
-          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
-        </button>
         <button id="btn-audio" class="sci-panel w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group" aria-label="Microphone">
           <i data-lucide="mic" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
         </button>
@@ -214,8 +212,8 @@ tailwind.config = {
     </header>
 
     <!-- Hero: fills the space between header and controls, content is centered in it -->
-    <main class="hero-main flex-1 min-h-0 flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden">
-      <div class="hero-inner flex flex-col items-center text-center max-w-5xl mx-auto">
+    <main class="flex-1 min-h-0 flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden">
+      <div class="flex flex-col items-center text-center max-w-5xl mx-auto">
         <h2 class="hero-title font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-1 leading-[1.12]">
           Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
         </h2>
@@ -328,12 +326,16 @@ tailwind.config = {
     const CAMERA_FOV = 60;
     const isMobile = Math.min(window.innerWidth, window.innerHeight) < 768 || window.matchMedia('(pointer: coarse)').matches;
 
-    // On portrait screens the horizontal field of view is narrow, so pull the
-    // camera back far enough that the whole particle shape stays visible.
+    // Pull camera back on portrait screens OR short landscape screens (mobile landscape)
     const getCameraZ = () => {
       const aspect = window.innerWidth / window.innerHeight;
-      if (aspect >= 1) return BASE_CAMERA_Z;
-      return BASE_CAMERA_Z * Math.min(1.85, 1 / (aspect * 1.05));
+      if (aspect < 1) {
+        return BASE_CAMERA_Z * Math.min(1.85, 1 / (aspect * 1.05));
+      }
+      if (window.innerHeight < 520) {
+        return BASE_CAMERA_Z * 1.35;
+      }
+      return BASE_CAMERA_Z;
     };
 
     // Half-size of the visible area at the origin plane, in world units.
@@ -605,8 +607,6 @@ tailwind.config = {
         gl_Position = projectionMatrix * mvPosition;
 
         vDist = length(pos);
-        // Fade distance follows the camera, so particles stay bright when the
-        // camera is pulled back on narrow (portrait) screens.
         float depthFade = smoothstep(uFadeFar, 10.0, -mvPosition.z);
         vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
         vColor = pos;
@@ -760,7 +760,6 @@ tailwind.config = {
           const landmarks = results.multiHandLandmarks[i];
           const handedness = results.multiHandedness[i].label;
 
-          // Map camera coordinates to what is actually visible on this screen
           const x = (0.5 - landmarks[9].x) * 2 * halfW * 0.9;
           const y = (0.5 - landmarks[9].y) * 2 * halfH * 0.9;
           const z = -landmarks[9].z * 30;
@@ -816,16 +815,6 @@ tailwind.config = {
       link.click();
     };
 
-    // Landscape / short screens: show or hide the Simulation panel
-    const uiRoot = document.getElementById('ui');
-    const controlsBtn = document.getElementById('btn-controls');
-    controlsBtn.onclick = () => {
-      const open = uiRoot.classList.toggle('controls-open');
-      controlsBtn.setAttribute('aria-expanded', String(open));
-      controlsBtn.classList.toggle('bg-white/10', open);
-    };
-
-    // Pointer events cover mouse AND touch, so particles also react on phones
     const updatePointerTarget = (e) => {
       if (STATE.hands.active) return;
       const { halfW, halfH } = getVisibleExtents();
@@ -836,7 +825,6 @@ tailwind.config = {
     window.addEventListener('pointermove', updatePointerTarget);
     window.addEventListener('pointerdown', updatePointerTarget);
     const releasePointer = (e) => {
-      // Touch has no hover: release the particles when the finger lifts
       if (e.pointerType !== 'mouse' && !STATE.hands.active) STATE.hands.right.target.set(100, 0, 0);
     };
     window.addEventListener('pointerup', releasePointer);
@@ -850,6 +838,7 @@ tailwind.config = {
       renderer.setSize(w, h);
       composer.setSize(w, h);
       CONFIG.cameraZ = getCameraZ();
+      camera.position.z = CONFIG.cameraZ;
       material.uniforms.uFadeFar.value = CONFIG.cameraZ + 32;
     };
     window.addEventListener('resize', onResize);
@@ -913,3 +902,4 @@ tailwind.config = {
   </script>
 </body>
 </html>
+```[cite: 2]
