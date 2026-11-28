@@ -1,809 +1,863 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#030305">
 <title>Aldo Lie Nopianto — Strategy, Design &amp; Engineering</title>
+
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
-theme: {
-extend: {
-fontFamily: {
-sans: ['Inter', 'sans-serif'],
-mono: ['JetBrains Mono', 'monospace'],
-},
-colors: {
-sci: {
-base: '#030305',
-panel: '#0a0a0c',
-border: '#ffffff1a',
-accent: '#ffffff',
-dim: '#888888',
-}
-},
-screens: {
-'xs': '380px',
-},
-letterSpacing: {
-tight: '-0.025em',
-tighter: '-0.05em',
-}
-}
-}
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        sci: {
+          base: '#030305',
+          panel: '#0a0a0c',
+          border: '#ffffff1a',
+          accent: '#ffffff',
+          dim: '#888888',
+        }
+      },
+      screens: { 'xs': '380px' },
+      letterSpacing: { tight: '-0.025em', tighter: '-0.05em' }
+    }
+  }
 }
 </script>
+
 <!-- Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
-<!-- MediaPipe (Global Scripts for reliability) -->
+
+<!-- MediaPipe -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
 <!-- Three.js & PostProcessing -->
-<script async="" src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 <script type="importmap">
 {
-"imports": {
-"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-}
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
 }
 </script>
+
 <style>
-body { margin: 0; overflow: hidden; background-color: #030305; color: white; touch-action: none; }
-canvas { display: block; width: 100vw; height: 100vh; outline: none; }
-.sci-panel {
-background: rgba(10, 10, 12, 0.75);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-border: 1px solid rgba(255, 255, 255, 0.08);
-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-}
-/* Subtle scanline effect */
-.scanlines {
-background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.06));
-background-size: 100% 4px;
-pointer-events: none;
-position: absolute; inset: 0; z-index: 10; opacity: 0.4;
-mix-blend-mode: overlay;
-}
-.vignette {
-position: absolute; inset: 0; pointer-events: none; z-index: 10;
-background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 120%);
-}
-/* Custom UI Elements */
-.btn-icon {
-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-icon:active { transform: scale(0.95); }
-/* Loading Animation */
-@keyframes pulse-ring {
-0% { transform: scale(0.8); opacity: 0.5; }
-100% { transform: scale(2.2); opacity: 0; }
-}
-.loader-ring {
-position: absolute; inset: 0; border-radius: 50%; border: 1px solid white;
-animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-</style></head>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #030305;
+    color: white;
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; outline: none; }
+
+  /* Full-viewport layers that follow the *visible* mobile viewport (dvh) */
+  .viewport-layer {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .sci-panel {
+    background: rgba(10, 10, 12, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  .scanlines {
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.06));
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 10; opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+  .vignette {
+    pointer-events: none; z-index: 10;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 120%);
+  }
+
+  /* Hero headline scales with both width and height so it never overflows on small phones */
+  .hero-title { font-size: clamp(1.6rem, min(8.4vw, 5.4vh), 2.9rem); }
+  .hero-copy  { font-size: clamp(0.8rem, min(3.6vw, 2.2vh), 1rem); }
+  @media (min-width: 640px) {
+    .hero-title { font-size: clamp(2.6rem, min(7vw, 9vh), 4.5rem); }
+    .hero-copy  { font-size: clamp(1rem, min(2.4vw, 2.6vh), 1.25rem); }
+  }
+
+  .btn-icon { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .btn-icon:active { transform: scale(0.95); }
+
+  /* Animations (previously referenced but not defined) */
+  @keyframes pulse-ring {
+    0%   { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+  @keyframes slide   { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+  .loader-ring {
+    position: absolute; inset: 0; border-radius: 50%; border: 1px solid white;
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loader-ring { animation: none; }
+  }
+</style>
+</head>
+
 <body class="antialiased font-sans text-sci-accent selection:bg-white/20">
 
-    <!-- Post-FX -->
-    <div class="scanlines"></div>
-    <div class="vignette"></div>
+  <!-- Post-FX -->
+  <div class="scanlines viewport-layer"></div>
+  <div class="vignette viewport-layer"></div>
 
-    <!-- Main Canvas -->
-    <div id="canvas-container" class="absolute inset-0 z-0"></div>
+  <!-- Main Canvas -->
+  <div id="canvas-container" class="viewport-layer z-0"></div>
 
-    <!-- UI: Header / HUD -->
-    <header class="absolute top-0 left-0 w-full p-4 md:p-6 z-30 flex flex-row justify-between items-start pointer-events-none">
-        
-        <!-- Left: Branding & Stats -->
-        <div class="flex flex-col gap-2 pointer-events-auto">
-            <div class="flex items-center gap-3">
-                <div class="relative w-2 h-2">
-                    <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
-                    <div class="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                </div>
-                <h1 class="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90">ALDOLIENOPIANTO<span class="opacity-40">.COM</span></h1>
-            </div>
-            
-            <div class="flex items-center text-[10px] font-mono text-sci-dim tracking-wider">
-                <span class="text-white/70">STRATEGY • DESIGN • ENGINEERING</span>
-                <span id="sim-mode" class="hidden">NEBULA CLOUD</span>
-            </div>
+  <!-- UI: one flex column (header / hero / controls) so elements can never overlap -->
+  <div id="ui" class="viewport-layer z-20 flex flex-col pointer-events-none">
+
+    <!-- Header / HUD -->
+    <header class="shrink-0 w-full px-4 md:px-6 pb-2 flex flex-row justify-between items-start"
+            style="padding-top: max(1rem, env(safe-area-inset-top));">
+      <div class="flex flex-col gap-2 pointer-events-auto min-w-0">
+        <div class="flex items-center gap-3">
+          <div class="relative w-2 h-2 shrink-0">
+            <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-20"></div>
+            <div class="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+          </div>
+          <h1 class="text-xs md:text-sm font-medium tracking-tight uppercase text-white/90 truncate">ALDOLIENOPIANTO<span class="opacity-40">.COM</span></h1>
         </div>
-
-        <!-- Right: Actions -->
-        <div class="flex gap-2 pointer-events-auto">
-            <button type="button" id="btn-audio" class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group cursor-pointer" aria-label="Microphone">
-                <i data-lucide="mic" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
-            </button>
-            <button type="button" id="btn-cam" class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group relative overflow-hidden cursor-pointer" aria-label="Camera">
-                <i data-lucide="video" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors z-10 relative"></i>
-                <div id="cam-active-indicator" class="absolute inset-0 bg-emerald-500/10 opacity-0 transition-opacity"></div>
-            </button>
-            <button type="button" id="btn-rec" class="sci-panel w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group cursor-pointer" aria-label="Capture">
-                <i data-lucide="aperture" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
-            </button>
+        <div class="flex items-center text-[10px] font-mono text-sci-dim tracking-wider">
+          <span class="text-white/70">STRATEGY • DESIGN • ENGINEERING</span>
+          <span id="sim-mode" class="hidden">NEBULA CLOUD</span>
         </div>
+      </div>
+
+      <div class="flex gap-2 pointer-events-auto shrink-0">
+        <button id="btn-audio" class="sci-panel w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group" aria-label="Microphone">
+          <i data-lucide="mic" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
+        </button>
+        <button id="btn-cam" class="sci-panel w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group relative overflow-hidden" aria-label="Camera">
+          <i data-lucide="video" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors z-10 relative"></i>
+          <div id="cam-active-indicator" class="absolute inset-0 bg-emerald-500/10 opacity-0 transition-opacity"></div>
+        </button>
+        <button id="btn-rec" class="sci-panel w-9 h-9 flex items-center justify-center rounded-md hover:bg-white/5 hover:border-white/20 transition-all group" aria-label="Capture">
+          <i data-lucide="aperture" class="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors"></i>
+        </button>
+      </div>
     </header>
 
-    <!-- NEW HERO SECTION -->
-    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none px-5 pb-28 md:pb-0">
-        <div class="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto">
-            <h1 class="text-3xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-2 leading-[1.1]">
-                Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
-            </h1>
-            <p class="mt-3 md:mt-6 text-xs sm:text-lg md:text-xl text-white/60 max-w-2xl font-medium leading-relaxed tracking-tight">
-                I’m Aldo—combining risk &amp; product strategy, web and visual media design, programming, and quality control to build resilient digital solutions. Founder of <a href="https://lieal.com" target="_blank" rel="noopener noreferrer" class="text-white/90 underline decoration-white/30 hover:decoration-white transition-colors pointer-events-auto">Lieal Corporation</a>.
-            </p>
-            <div class="mt-5 md:mt-10 flex flex-row items-center justify-center gap-3 md:gap-4 w-full sm:w-auto pointer-events-auto">
-                <!-- Portfolio Button -->
-                <button type="button" class="group relative px-4 py-2.5 md:px-6 md:py-3.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/5 transition-all duration-300 flex items-center gap-2 overflow-hidden shadow-lg shadow-black/20 cursor-pointer">
-                    <span class="text-xs md:text-sm font-medium text-white/90">View Portfolio</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 md:w-4 md:h-4 text-white/70 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
-                    <!-- Shine Effect -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                </button>
-                
-                <!-- Contact Button -->
-                <button type="button" class="px-5 py-2.5 md:px-8 md:py-3.5 rounded-full border border-orange-500/40 text-white/80 hover:text-white hover:bg-orange-500/5 hover:border-orange-500/70 transition-all duration-300 text-xs md:text-sm font-medium shadow-[0_0_15px_-5px_rgba(249,115,22,0.15)] hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)] cursor-pointer">
-                    Contact Me
-                </button>
-            </div>
+    <!-- Hero: fills the space between header and controls, content is centered in it -->
+    <main class="flex-1 min-h-0 flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden">
+      <div class="flex flex-col items-center text-center max-w-5xl mx-auto">
+        <h2 class="hero-title font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-1 leading-[1.12]">
+          Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
+        </h2>
+        <p class="hero-copy mt-3 sm:mt-6 text-white/60 max-w-2xl font-medium leading-relaxed tracking-tight">
+          I’m Aldo—combining risk &amp; product strategy, web and visual media design, programming, and quality control to build resilient digital solutions. Founder of <a href="https://lieal.com" target="_blank" rel="noopener noreferrer" class="text-white/90 underline decoration-white/30 hover:decoration-white transition-colors pointer-events-auto">Lieal Corporation</a>.
+        </p>
+        <div class="mt-5 sm:mt-10 flex flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 pointer-events-auto">
+          <button class="group relative px-5 sm:px-6 py-3 sm:py-3.5 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:bg-white/5 transition-all duration-300 flex items-center gap-2.5 overflow-hidden shadow-lg shadow-black/20">
+            <span class="text-sm font-medium text-white/90">View Portfolio</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-white/70 group-hover:text-white transition-transform group-hover:translate-x-1"></i>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+          </button>
+          <button class="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full border border-orange-500/40 text-white/80 hover:text-white hover:bg-orange-500/5 hover:border-orange-500/70 transition-all duration-300 text-sm font-medium shadow-[0_0_15px_-5px_rgba(249,115,22,0.15)] hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)]">
+            Contact Me
+          </button>
         </div>
+      </div>
+    </main>
+
+    <!-- Bottom controls -->
+    <div class="shrink-0 w-full px-4 md:px-6 pt-2 flex flex-col md:flex-row md:justify-between md:items-end gap-3"
+         style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+
+      <!-- Mode selector -->
+      <div class="sci-panel p-2.5 md:p-3 rounded-xl pointer-events-auto w-full md:w-64 md:max-w-[300px] border border-white/5">
+        <div class="flex justify-between items-center mb-2 md:mb-3 px-1">
+          <div class="flex items-center gap-2">
+            <i data-lucide="cpu" class="w-3 h-3 text-white/40"></i>
+            <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
+          </div>
+          <div id="hand-status" class="opacity-0 transition-opacity duration-300 flex items-center gap-1.5 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+            <div class="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
+            <span class="text-[9px] font-mono text-emerald-400 tracking-tight">TRACKING</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 md:grid-cols-2 gap-1.5">
+          <button onclick="window.setMode(0)" class="mode-btn active group relative flex items-center justify-center md:justify-between px-2 md:px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-left">
+            <span class="text-[10px] text-white group-hover:text-white font-medium">Nebula</span>
+            <span class="hidden md:inline text-[9px] font-mono text-white/30">01</span>
+          </button>
+          <button onclick="window.setMode(1)" class="mode-btn group relative flex items-center justify-center md:justify-between px-2 md:px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+            <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
+            <span class="hidden md:inline text-[9px] font-mono text-white/20">02</span>
+          </button>
+          <button onclick="window.setMode(2)" class="mode-btn group relative flex items-center justify-center md:justify-between px-2 md:px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+            <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
+            <span class="hidden md:inline text-[9px] font-mono text-white/20">03</span>
+          </button>
+          <button onclick="window.setMode(3)" class="mode-btn group relative flex items-center justify-center md:justify-between px-2 md:px-2.5 py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-left">
+            <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Vortex</span>
+            <span class="hidden md:inline text-[9px] font-mono text-white/20">04</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Palette + copyright -->
+      <div class="flex flex-row md:flex-col items-center md:items-end justify-between gap-3 pointer-events-auto">
+        <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-2">
+          <button onclick="window.cycleColor(0)" aria-label="Indigo palette" class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
+          <button onclick="window.cycleColor(1)" aria-label="Emerald palette" class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
+          <button onclick="window.cycleColor(2)" aria-label="Sunset palette" class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 transition-transform duration-300"></button>
+        </div>
+
+        <div class="text-[9px] font-mono text-right text-white/40 md:text-white/30 leading-tight">
+          <p>© <span data-year>2026</span> ALDO LIE NOPIANTO</p>
+          <p class="hidden md:block mt-0.5">ALL RIGHTS RESERVED</p>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- UI: Camera Preview (Hidden but functional) -->
-    <video id="input-video" class="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none z-[-1]" playsinline=""></video>
+  <!-- Camera input (hidden but functional) -->
+  <video id="input-video" class="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none z-[-1]" playsinline></video>
 
-    <!-- UI: Bottom Controls Area -->
-    <div class="absolute bottom-0 left-0 w-full z-30 pointer-events-none px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-6 flex flex-row justify-between items-center md:items-end gap-2 md:gap-4">
-        
-        <!-- Left: Mode Selector -->
-        <div class="sci-panel p-1.5 md:p-3 rounded-xl pointer-events-auto flex-1 min-w-0 md:flex-none md:w-64 md:max-w-[300px] backdrop-blur-xl border border-white/5">
-            <div class="hidden md:flex justify-between items-center mb-3 px-1">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="cpu" class="w-3 h-3 text-white/40"></i>
-                    <span class="text-[10px] font-medium uppercase tracking-widest text-white/50">Simulation</span>
-                </div>
-                <!-- Gesture Status Indicator -->
-                <div id="hand-status" class="opacity-0 transition-opacity duration-300 flex items-center gap-1.5 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                    <div class="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
-                    <span class="text-[9px] font-mono text-emerald-400 tracking-tight">TRACKING</span>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-1.5">
-                <button type="button" onclick="window.setMode(0)" class="mode-btn active group relative flex items-center justify-center md:justify-between px-1 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all border border-transparent hover:border-white/10 text-center md:text-left cursor-pointer">
-                    <span class="text-[10px] text-white/80 group-hover:text-white font-medium">Nebula</span>
-                    <span class="hidden md:inline text-[9px] font-mono text-white/30">01</span>
-                    <div class="absolute inset-0 border border-white/10 rounded-lg opacity-0 group-[.active]:opacity-100 pointer-events-none"></div>
-                </button>
-                <button type="button" onclick="window.setMode(1)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left cursor-pointer">
-                    <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Torus</span>
-                    <span class="hidden md:inline text-[9px] font-mono text-white/20">02</span>
-                </button>
-                <button type="button" onclick="window.setMode(2)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left cursor-pointer">
-                    <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Lattice</span>
-                    <span class="hidden md:inline text-[9px] font-mono text-white/20">03</span>
-                </button>
-                <button type="button" onclick="window.setMode(3)" class="mode-btn group relative flex items-center justify-center md:justify-between px-1 py-1.5 md:px-2.5 md:py-2 rounded-lg bg-transparent hover:bg-white/5 transition-all border border-transparent hover:border-white/10 text-center md:text-left cursor-pointer">
-                    <span class="text-[10px] text-white/60 group-hover:text-white transition-colors">Vortex</span>
-                    <span class="hidden md:inline text-[9px] font-mono text-white/20">04</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Right: Color & Info -->
-        <div class="relative z-30 flex flex-row md:flex-col items-center md:items-end gap-3 pointer-events-auto shrink-0">
-            <!-- Palette Switcher -->
-            <div class="sci-panel p-1.5 rounded-full flex md:flex-col flex-row gap-2">
-                <button type="button" onclick="window.cycleColor(0)" class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 ring-1 ring-white/10 hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer" aria-label="Color Purple"></button>
-                <button type="button" onclick="window.cycleColor(1)" class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 ring-1 ring-white/10 hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer" aria-label="Color Cyan"></button>
-                <button type="button" onclick="window.cycleColor(2)" class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-rose-600 ring-1 ring-white/10 hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer" aria-label="Color Orange"></button>
-            </div>
-            
-            <div class="hidden md:block text-[9px] font-mono text-right text-white/30 leading-tight">
-                <p>© <span id="year">2026</span> ALDO LIE NOPIANTO</p>
-                <p class="mt-0.5">ALL RIGHTS RESERVED</p>
-            </div>
-        </div>
+  <!-- Loader -->
+  <div id="loader" class="viewport-layer z-50 bg-[#030305] flex flex-col items-center justify-center transition-opacity duration-1000 pointer-events-none">
+    <div class="relative w-12 h-12 mb-6">
+      <div class="loader-ring"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+      </div>
     </div>
-
-    <!-- Loader -->
-    <div id="loader" class="fixed inset-0 z-50 bg-[#030305] flex flex-col items-center justify-center transition-opacity duration-1000 pointer-events-none">
-        <div class="relative w-12 h-12 mb-6">
-            <div class="loader-ring"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
-            </div>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-            <div class="text-[10px] font-mono tracking-[0.3em] text-white/50 uppercase">Loading Assets</div>
-            <div class="w-24 h-px bg-white/10 relative overflow-hidden">
-                <div class="absolute inset-y-0 left-0 w-1/2 bg-white/40 animate-[slide_1s_infinite_linear]"></div>
-            </div>
-        </div>
+    <div class="flex flex-col items-center gap-2">
+      <div class="text-[10px] font-mono tracking-[0.3em] text-white/50 uppercase">Loading Assets</div>
+      <div class="w-24 h-px bg-white/10 relative overflow-hidden">
+        <div class="absolute inset-y-0 left-0 w-1/2 bg-white/40 animate-[slide_1s_infinite_linear]"></div>
+      </div>
     </div>
+  </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-        
-        // --- CONFIGURATION ---
-        const isMobile = window.innerWidth < 768;
-        const CONFIG = {
-            particleCount: isMobile ? 18000 : 120000,
-            cameraZ: isMobile ? 35 : 28,
-            bgColor: 0x030305
-        };
+  <!-- Copyright year: plain script, runs even if the 3D module fails to load -->
+  <script>
+    (function () {
+      var year = new Date().getFullYear();
+      var nodes = document.querySelectorAll('[data-year]');
+      for (var i = 0; i < nodes.length; i++) nodes[i].textContent = year;
+    })();
+  </script>
 
-        // --- STATE ---
-        const STATE = {
-            mouse: new THREE.Vector2(0, 0),
-            hands: {
-                active: false,
-                left: { pos: new THREE.Vector3(-100, 0, 0), target: new THREE.Vector3(-100, 0, 0), state: 0 },
-                right: { pos: new THREE.Vector3(100, 0, 0), target: new THREE.Vector3(100, 0, 0), state: 0 },
-            },
-            mode: 0,
-            targetMode: 0,
-            audioLevel: 0,
-            time: 0,
-            colorPalette: 0
-        };
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-        // --- SCENE SETUP ---
-        const container = document.getElementById('canvas-container');
-        const renderer = new THREE.WebGLRenderer({ 
-            antialias: false, 
-            powerPreference: "high-performance",
-            alpha: false,
-            stencil: false,
-            depth: true
-        });
-        
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.toneMapping = THREE.CineonToneMapping;
-        renderer.toneMappingExposure = 1.2;
-        container.appendChild(renderer.domElement);
+    // --- CONFIGURATION ---
+    const BASE_CAMERA_Z = 28;
+    const CAMERA_FOV = 60;
+    const isMobile = window.innerWidth < 768;
 
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(CONFIG.bgColor, 0.015);
-        scene.background = new THREE.Color(CONFIG.bgColor);
+    // On portrait screens the horizontal field of view is narrow, so pull the
+    // camera back far enough that the whole particle shape stays visible.
+    const getCameraZ = () => {
+      const aspect = window.innerWidth / window.innerHeight;
+      if (aspect >= 1) return BASE_CAMERA_Z;
+      return BASE_CAMERA_Z * Math.min(1.85, 1 / (aspect * 1.05));
+    };
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.z = CONFIG.cameraZ;
+    // Half-size of the visible area at the origin plane, in world units.
+    const getVisibleExtents = () => {
+      const halfH = Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV / 2)) * CONFIG.cameraZ;
+      return { halfW: halfH * (window.innerWidth / window.innerHeight), halfH };
+    };
 
-        // --- POST PROCESSING ---
-        const renderScene = new RenderPass(scene, camera);
+    const CONFIG = {
+      particleCount: isMobile ? 65000 : 120000,
+      cameraZ: getCameraZ(),
+      bgColor: 0x030305
+    };
 
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.1;
-        bloomPass.strength = 1.0; 
-        bloomPass.radius = 0.8;
+    // --- STATE ---
+    const STATE = {
+      hands: {
+        active: false,
+        left:  { pos: new THREE.Vector3(-100, 0, 0), target: new THREE.Vector3(-100, 0, 0), state: 0 },
+        right: { pos: new THREE.Vector3(100, 0, 0),  target: new THREE.Vector3(100, 0, 0),  state: 0 },
+      },
+      mode: 0,
+      targetMode: 0,
+      audioLevel: 0,
+      time: 0,
+      colorPalette: 0
+    };
 
-        const outputShader = {
-            uniforms: {
-                "tDiffuse": { value: null },
-                "uTime": { value: 0 },
-                "uRGBShift": { value: 0.002 }
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform sampler2D tDiffuse;
-                uniform float uTime;
-                uniform float uRGBShift;
-                varying vec2 vUv;
-                
-                float random(vec2 p) {
-                    return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
-                }
+    // --- SCENE SETUP ---
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      powerPreference: "high-performance",
+      alpha: false,
+      stencil: false,
+      depth: true
+    });
 
-                void main() {
-                    vec2 uv = vUv;
-                    
-                    float dist = distance(uv, vec2(0.5));
-                    vec2 offset = (uv - 0.5) * dist * uRGBShift;
-                    
-                    float r = texture2D(tDiffuse, uv + offset).r;
-                    float g = texture2D(tDiffuse, uv).g;
-                    float b = texture2D(tDiffuse, uv - offset).b;
-                    
-                    vec3 color = vec3(r, g, b);
-                    
-                    float noise = (random(uv + uTime) - 0.5) * 0.04;
-                    color += noise;
-                    
-                    gl_FragColor = vec4(color, 1.0);
-                }
-            `
-        };
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.CineonToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    container.appendChild(renderer.domElement);
 
-        const finalPass = new ShaderPass(outputShader);
-        const composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-        composer.addPass(finalPass);
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(CONFIG.bgColor, 0.015);
+    scene.background = new THREE.Color(CONFIG.bgColor);
 
-        // --- PARTICLE SYSTEM ---
-        const particleVertexShader = `
-            uniform float uTime;
-            uniform float uMode;
-            uniform vec3 uHandLeft;
-            uniform vec3 uHandRight;
-            uniform float uHandLeftState;
-            uniform float uHandRightState;
-            uniform float uAudio;
-            uniform float uMobileOffsetY;
-            
-            attribute vec3 aRandom;
-            attribute float aIndex;
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.z = CONFIG.cameraZ;
 
-            varying vec3 vColor;
-            varying float vAlpha;
-            varying float vDist;
+    // --- POST PROCESSING ---
+    const renderScene = new RenderPass(scene, camera);
 
-            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    bloomPass.threshold = 0.1;
+    bloomPass.strength = 1.0;
+    bloomPass.radius = 0.8;
 
-            float snoise(vec3 v) {
-                const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-                const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-                vec3 i  = floor(v + dot(v, C.yyy) );
-                vec3 x0 = v - i + dot(i, C.xxx) ;
-                vec3 g = step(x0.yzx, x0.xyz);
-                vec3 l = 1.0 - g;
-                vec3 i1 = min( g.xyz, l.zxy );
-                vec3 i2 = max( g.xyz, l.zxy );
-                vec3 x1 = x0 - i1 + C.xxx;
-                vec3 x2 = x0 - i2 + C.yyy;
-                vec3 x3 = x0 - D.yyy;
-                i = mod289(i);
-                vec4 p = permute( permute( permute(
-                            i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                        + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                        + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-                float n_ = 0.142857142857;
-                vec3  ns = n_ * D.wyz - D.xzx;
-                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-                vec4 x_ = floor(j * ns.z);
-                vec4 y_ = floor(j - 7.0 * x_ );
-                vec4 x = x_ *ns.x + ns.yyyy;
-                vec4 y = y_ *ns.x + ns.yyyy;
-                vec4 h = 1.0 - abs(x) - abs(y);
-                vec4 b0 = vec4( x.xy, y.xy );
-                vec4 b1 = vec4( x.zw, y.zw );
-                vec4 s0 = floor(b0)*2.0 + 1.0;
-                vec4 s1 = floor(b1)*2.0 + 1.0;
-                vec4 sh = -step(h, vec4(0.0));
-                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-                vec3 p0 = vec3(a0.xy,h.x);
-                vec3 p1 = vec3(a0.zw,h.y);
-                vec3 p2 = vec3(a1.xy,h.z);
-                vec3 p3 = vec3(a1.zw,h.w);
-                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-                m = m * m;
-                return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
-            }
+    const outputShader = {
+      uniforms: {
+        "tDiffuse": { value: null },
+        "uTime": { value: 0 },
+        "uRGBShift": { value: 0.002 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float uTime;
+        uniform float uRGBShift;
+        varying vec2 vUv;
 
-            vec3 getPosSphere(float idx) {
-                float phi = acos( -1.0 + ( 2.0 * idx ) / ${CONFIG.particleCount}.0 );
-                float theta = sqrt( ${CONFIG.particleCount}.0 * 3.1415926 ) * phi;
-                float r = 12.0 + aRandom.x * 2.0;
-                return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
-            }
-
-            vec3 getPosTorus(float idx) {
-                float t = idx * 0.1;
-                float r = 10.0 + aRandom.y * 3.0;
-                float tube = 3.0 + aRandom.x * 2.0;
-                float angle = (idx / ${CONFIG.particleCount}.0) * 6.28 * 15.0;
-                return vec3(
-                    (r + tube * cos(angle)) * cos(t),
-                    (r + tube * cos(angle)) * sin(t),
-                    tube * sin(angle)
-                );
-            }
-
-            vec3 getPosLattice(float idx) {
-                float size = 25.0;
-                float step = pow(${CONFIG.particleCount}.0, 1.0/3.0);
-                float x = mod(idx, step);
-                float y = mod(floor(idx/step), step);
-                float z = floor(idx/(step*step));
-                return (vec3(x, y, z) / step - 0.5) * size;
-            }
-
-            vec3 getPosVortex(float idx) {
-                float r = (idx / ${CONFIG.particleCount}.0) * 18.0;
-                float ang = r * 3.0;
-                float h = (aRandom.x - 0.5) * 8.0 * (1.0 - r/20.0);
-                return vec3(r * cos(ang), r * sin(ang), h);
-            }
-
-            vec3 blend(vec3 p1, vec3 p2, float t) {
-                return mix(p1, p2, smoothstep(0.0, 1.0, t));
-            }
-
-            void main() {
-                float t = uTime * 0.15; 
-                vec3 pos = vec3(0.0);
-                
-                float m = uMode; 
-                vec3 pSphere = getPosSphere(aIndex);
-                vec3 pTorus = getPosTorus(aIndex);
-                vec3 pLattice = getPosLattice(aIndex);
-                vec3 pVortex = getPosVortex(aIndex);
-
-                vec3 noiseBase = vec3(
-                    snoise(vec3(aIndex*0.01, t*0.2, 0.0)),
-                    snoise(vec3(aIndex*0.01, 0.0, t*0.2)),
-                    snoise(vec3(0.0, aIndex*0.01, t*0.2))
-                );
-
-                pSphere += noiseBase * 4.0;
-                pTorus += noiseBase * 2.0;
-                pLattice += noiseBase * 1.5;
-                pVortex += noiseBase * 2.0;
-
-                float c = cos(t*0.3); float s = sin(t*0.3);
-                pTorus.xy = mat2(c, -s, s, c) * pTorus.xy;
-                pTorus.xz = mat2(c, -s, s, c) * pTorus.xz;
-
-                float va = t * 1.0 - length(pVortex.xy)*0.2;
-                float vc = cos(va); float vs = sin(va);
-                pVortex.xy = mat2(vc, -vs, vs, vc) * pVortex.xy;
-
-                if(m <= 0.0) pos = pSphere;
-                else if(m <= 1.0) pos = mix(pSphere, pTorus, m);
-                else if(m <= 2.0) pos = mix(pTorus, pLattice, m - 1.0);
-                else if(m <= 3.0) pos = mix(pLattice, pVortex, m - 2.0);
-                else pos = pVortex;
-
-                pos *= (1.0 + uAudio * 0.4);
-                pos.y += uMobileOffsetY;
-
-                if (uHandLeft.x > -90.0) {
-                    float d = distance(pos, uHandLeft);
-                    float influence = smoothstep(12.0, 0.0, d);
-                    if (uHandLeftState < 0.0) {
-                        pos = mix(pos, uHandLeft, influence * 0.3); 
-                    } else {
-                         pos += normalize(pos - uHandLeft) * influence * 8.0;
-                    }
-                }
-                
-                if (uHandRight.x < 90.0) {
-                    float d = distance(pos, uHandRight);
-                    float influence = smoothstep(12.0, 0.0, d);
-                    if (uHandRightState < 0.0) {
-                        pos = mix(pos, uHandRight, influence * 0.3);
-                    } else {
-                        pos += normalize(pos - uHandRight) * influence * 8.0;
-                    }
-                }
-
-                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-                gl_PointSize = max(2.0, (1.8 + aRandom.y * 2.2 + uAudio * 5.0) * (32.0 / -mvPosition.z));
-                gl_Position = projectionMatrix * mvPosition;
-                
-                vDist = length(pos);
-                float depthFade = smoothstep(80.0, 10.0, -mvPosition.z);
-                vAlpha = depthFade * (0.35 + aRandom.z * 0.65);
-                vColor = pos; 
-            }
-        `;
-
-        const particleFragmentShader = `
-            uniform vec3 uColor1;
-            uniform vec3 uColor2;
-            varying vec3 vColor;
-            varying float vAlpha;
-            varying float vDist;
-
-            void main() {
-                vec2 center = gl_PointCoord - 0.5;
-                float dist = length(center);
-                if (dist > 0.5) discard;
-                
-                float glow = 1.0 - smoothstep(0.0, 0.5, dist);
-                glow = pow(glow, 1.5);
-
-                vec3 col = mix(uColor1, uColor2, smoothstep(-20.0, 20.0, vColor.x + vColor.y));
-                
-                gl_FragColor = vec4(col, vAlpha * glow);
-            }
-        `;
-
-        const geometry = new THREE.BufferGeometry();
-        const indices = new Float32Array(CONFIG.particleCount);
-        const randoms = new Float32Array(CONFIG.particleCount * 3);
-
-        for (let i = 0; i < CONFIG.particleCount; i++) {
-            indices[i] = i;
-            randoms[i * 3] = Math.random();
-            randoms[i * 3 + 1] = Math.random();
-            randoms[i * 3 + 2] = Math.random();
+        float random(vec2 p) {
+          return fract(sin(dot(p.xy, vec2(12.9898, 78.233))) * 43758.5453);
         }
 
-        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(CONFIG.particleCount * 3).fill(0), 3));
-        geometry.setAttribute('aIndex', new THREE.BufferAttribute(indices, 1));
-        geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+        void main() {
+          vec2 uv = vUv;
 
-        const palettes = [
-            { c1: new THREE.Color('#818cf8'), c2: new THREE.Color('#2dd4bf') },
-            { c1: new THREE.Color('#f472b6'), c2: new THREE.Color('#60a5fa') },
-            { c1: new THREE.Color('#fb923c'), c2: new THREE.Color('#e11d48') },
-        ];
+          float dist = distance(uv, vec2(0.5));
+          vec2 offset = (uv - 0.5) * dist * uRGBShift;
 
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                uTime: { value: 0 },
-                uMode: { value: 0 },
-                uHandLeft: { value: new THREE.Vector3(-100, 0, 0) },
-                uHandRight: { value: new THREE.Vector3(100, 0, 0) },
-                uHandLeftState: { value: 0 },
-                uHandRightState: { value: 0 },
-                uAudio: { value: 0 },
-                uMobileOffsetY: { value: isMobile ? 4.5 : 0.0 },
-                uColor1: { value: palettes[0].c1 },
-                uColor2: { value: palettes[0].c2 }
-            },
-            vertexShader: particleVertexShader,
-            fragmentShader: particleFragmentShader,
-            transparent: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending
-        });
+          float r = texture2D(tDiffuse, uv + offset).r;
+          float g = texture2D(tDiffuse, uv).g;
+          float b = texture2D(tDiffuse, uv - offset).b;
 
-        const points = new THREE.Points(geometry, material);
-        scene.add(points);
+          vec3 color = vec3(r, g, b);
 
-        // --- AUDIO SYSTEM ---
-        let audioContext, analyser, dataArray;
-        const setupAudio = async () => {
-            if (audioContext) return;
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 64;
-                analyser.smoothingTimeConstant = 0.8;
-                source.connect(analyser);
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
-                const btn = document.getElementById('btn-audio');
-                btn.classList.add('bg-white/10', 'border-white/20');
-                btn.querySelector('i').classList.remove('text-white/60');
-                btn.querySelector('i').classList.add('text-emerald-400');
-            } catch (e) {
-                console.error("Audio denied", e);
-            }
-        };
+          float noise = (random(uv + uTime) - 0.5) * 0.04;
+          color += noise;
 
-        // --- HAND TRACKING SYSTEM ---
-        const initHandTracking = async () => {
-            const btn = document.getElementById('btn-cam');
-            const videoElement = document.getElementById('input-video');
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `
+    };
 
-            btn.querySelector('i').classList.add('animate-spin');
+    const finalPass = new ShaderPass(outputShader);
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+    composer.addPass(finalPass);
 
-            try {
-                const hands = new window.Hands({locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-                }});
-                
-                hands.setOptions({
-                    maxNumHands: 2,
-                    modelComplexity: 1,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
+    // --- PARTICLE SYSTEM ---
+    const particleVertexShader = `
+      uniform float uTime;
+      uniform float uMode;
+      uniform float uFadeFar;
+      uniform vec3 uHandLeft;
+      uniform vec3 uHandRight;
+      uniform float uHandLeftState;
+      uniform float uHandRightState;
+      uniform float uAudio;
 
-                hands.onResults(onHandsResults);
+      attribute vec3 aRandom;
+      attribute float aIndex;
 
-                const cam = new window.Camera(videoElement, {
-                    onFrame: async () => {
-                        await hands.send({image: videoElement});
-                    },
-                    width: 640,
-                    height: 480
-                });
-                
-                await cam.start();
+      varying vec3 vColor;
+      varying float vAlpha;
+      varying float vDist;
 
-                btn.querySelector('i').classList.remove('animate-spin');
-                btn.querySelector('i').classList.add('text-emerald-400', 'text-white');
-                document.getElementById('cam-active-indicator').classList.remove('opacity-0');
-                
-            } catch (err) {
-                console.error("Camera Init Error:", err);
-                btn.querySelector('i').classList.remove('animate-spin');
-                alert("Could not access camera. Please allow permissions.");
-            }
-        };
+      vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
 
-        function onHandsResults(results) {
-            STATE.hands.active = false;
-            
-            if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-                STATE.hands.left.target.set(-100, 0, 0);
-                STATE.hands.right.target.set(100, 0, 0);
-                document.getElementById('hand-status').classList.add('opacity-0');
-            } else {
-                STATE.hands.active = true;
-                document.getElementById('hand-status').classList.remove('opacity-0');
+      float snoise(vec3 v) {
+        const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+        const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+        vec3 i  = floor(v + dot(v, C.yyy) );
+        vec3 x0 = v - i + dot(i, C.xxx) ;
+        vec3 g = step(x0.yzx, x0.xyz);
+        vec3 l = 1.0 - g;
+        vec3 i1 = min( g.xyz, l.zxy );
+        vec3 i2 = max( g.xyz, l.zxy );
+        vec3 x1 = x0 - i1 + C.xxx;
+        vec3 x2 = x0 - i2 + C.yyy;
+        vec3 x3 = x0 - D.yyy;
+        i = mod289(i);
+        vec4 p = permute( permute( permute(
+                  i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+                + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+                + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+        float n_ = 0.142857142857;
+        vec3  ns = n_ * D.wyz - D.xzx;
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+        vec4 x_ = floor(j * ns.z);
+        vec4 y_ = floor(j - 7.0 * x_ );
+        vec4 x = x_ *ns.x + ns.yyyy;
+        vec4 y = y_ *ns.x + ns.yyyy;
+        vec4 h = 1.0 - abs(x) - abs(y);
+        vec4 b0 = vec4( x.xy, y.xy );
+        vec4 b1 = vec4( x.zw, y.zw );
+        vec4 s0 = floor(b0)*2.0 + 1.0;
+        vec4 s1 = floor(b1)*2.0 + 1.0;
+        vec4 sh = -step(h, vec4(0.0));
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+        vec3 p0 = vec3(a0.xy,h.x);
+        vec3 p1 = vec3(a0.zw,h.y);
+        vec3 p2 = vec3(a1.xy,h.z);
+        vec3 p3 = vec3(a1.zw,h.w);
+        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+        m = m * m;
+        return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+      }
 
-                for (let i = 0; i < results.multiHandLandmarks.length; i++) {
-                    const landmarks = results.multiHandLandmarks[i];
-                    const handedness = results.multiHandedness[i].label;
-                    
-                    const x = (0.5 - landmarks[9].x) * 50; 
-                    const y = (0.5 - landmarks[9].y) * 35;
-                    const z = -landmarks[9].z * 30;
+      vec3 getPosSphere(float idx) {
+        float phi = acos( -1.0 + ( 2.0 * idx ) / ${CONFIG.particleCount}.0 );
+        float theta = sqrt( ${CONFIG.particleCount}.0 * 3.1415926 ) * phi;
+        float r = 12.0 + aRandom.x * 2.0;
+        return vec3(r * sin(phi) * cos(theta), r * sin(phi) * sin(theta), r * cos(phi));
+      }
 
-                    const thumbTip = landmarks[4];
-                    const indexTip = landmarks[8];
-                    const pinchDist = Math.sqrt(
-                        Math.pow(thumbTip.x - indexTip.x, 2) + 
-                        Math.pow(thumbTip.y - indexTip.y, 2)
-                    );
-                    
-                    let state = 0;
-                    if (pinchDist < 0.05) state = -1.0;
-                    else state = 1.0;
+      vec3 getPosTorus(float idx) {
+        float t = idx * 0.1;
+        float r = 10.0 + aRandom.y * 3.0;
+        float tube = 3.0 + aRandom.x * 2.0;
+        float angle = (idx / ${CONFIG.particleCount}.0) * 6.28 * 15.0;
+        return vec3(
+          (r + tube * cos(angle)) * cos(t),
+          (r + tube * cos(angle)) * sin(t),
+          tube * sin(angle)
+        );
+      }
 
-                    if (handedness === 'Right') {
-                        STATE.hands.right.target.set(x, y, z);
-                        STATE.hands.right.state = state;
-                    } else {
-                        STATE.hands.left.target.set(x, y, z);
-                        STATE.hands.left.state = state;
-                    }
-                }
-            }
+      vec3 getPosLattice(float idx) {
+        float size = 25.0;
+        float step = pow(${CONFIG.particleCount}.0, 1.0/3.0);
+        float x = mod(idx, step);
+        float y = mod(floor(idx/step), step);
+        float z = floor(idx/(step*step));
+        return (vec3(x, y, z) / step - 0.5) * size;
+      }
+
+      vec3 getPosVortex(float idx) {
+        float r = (idx / ${CONFIG.particleCount}.0) * 18.0;
+        float ang = r * 3.0;
+        float h = (aRandom.x - 0.5) * 8.0 * (1.0 - r/20.0);
+        return vec3(r * cos(ang), r * sin(ang), h);
+      }
+
+      void main() {
+        float t = uTime * 0.15;
+        vec3 pos = vec3(0.0);
+
+        float m = uMode;
+        vec3 pSphere = getPosSphere(aIndex);
+        vec3 pTorus = getPosTorus(aIndex);
+        vec3 pLattice = getPosLattice(aIndex);
+        vec3 pVortex = getPosVortex(aIndex);
+
+        vec3 noiseBase = vec3(
+          snoise(vec3(aIndex*0.01, t*0.2, 0.0)),
+          snoise(vec3(aIndex*0.01, 0.0, t*0.2)),
+          snoise(vec3(0.0, aIndex*0.01, t*0.2))
+        );
+
+        pSphere += noiseBase * 4.0;
+        pTorus += noiseBase * 2.0;
+        pLattice += noiseBase * 1.5;
+        pVortex += noiseBase * 2.0;
+
+        float c = cos(t*0.3); float s = sin(t*0.3);
+        pTorus.xy = mat2(c, -s, s, c) * pTorus.xy;
+        pTorus.xz = mat2(c, -s, s, c) * pTorus.xz;
+
+        float va = t * 1.0 - length(pVortex.xy)*0.2;
+        float vc = cos(va); float vs = sin(va);
+        pVortex.xy = mat2(vc, -vs, vs, vc) * pVortex.xy;
+
+        if(m <= 0.0) pos = pSphere;
+        else if(m <= 1.0) pos = mix(pSphere, pTorus, m);
+        else if(m <= 2.0) pos = mix(pTorus, pLattice, m - 1.0);
+        else if(m <= 3.0) pos = mix(pLattice, pVortex, m - 2.0);
+        else pos = pVortex;
+
+        pos *= (1.0 + uAudio * 0.4);
+
+        if (uHandLeft.x > -90.0) {
+          float d = distance(pos, uHandLeft);
+          float influence = smoothstep(12.0, 0.0, d);
+          if (uHandLeftState < 0.0) {
+            pos = mix(pos, uHandLeft, influence * 0.3);
+          } else {
+            pos += normalize(pos - uHandLeft) * influence * 8.0;
+          }
         }
 
-        // --- INTERACTION LOGIC ---
-        window.setMode = (idx) => {
-            STATE.targetMode = idx;
-            document.querySelectorAll('.mode-btn').forEach((btn, i) => {
-                if (i === idx) {
-                    btn.classList.add('active', 'bg-white/10');
-                    btn.classList.remove('bg-transparent');
-                    btn.querySelector('span:first-child').classList.add('text-white');
-                } else {
-                    btn.classList.remove('active', 'bg-white/10');
-                    btn.classList.add('bg-transparent');
-                    btn.querySelector('span:first-child').classList.remove('text-white');
-                }
-            });
-            const names = ['NEBULA CLOUD', 'QUANTUM TORUS', 'CYBER LATTICE', 'WARP VORTEX'];
-            const simEl = document.getElementById('sim-mode');
-            if (simEl) simEl.innerText = names[idx];
-        };
-
-        window.cycleColor = (idx) => {
-            STATE.colorPalette = idx;
-        };
-
-        // --- EVENTS ---
-        document.getElementById('btn-audio').onclick = setupAudio;
-        document.getElementById('btn-cam').onclick = initHandTracking;
-        document.getElementById('btn-rec').onclick = () => {
-            renderer.render(scene, camera);
-            const link = document.createElement('a');
-            link.download = `aldolienopianto-${Date.now()}.png`;
-            link.href = renderer.domElement.toDataURL('image/png');
-            link.click();
-        };
-
-        window.addEventListener('mousemove', (e) => {
-            if (STATE.hands.active) return;
-            const x = (e.clientX / window.innerWidth) * 2 - 1;
-            const y = -(e.clientY / window.innerHeight) * 2 + 1;
-            STATE.hands.right.target.set(x * 30, y * 20, 0);
-        });
-
-        window.addEventListener('touchmove', (e) => {
-            if (STATE.hands.active || !e.touches[0]) return;
-            const x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-            const y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-            STATE.hands.right.target.set(x * 25, y * 18 + 4.5, 0);
-        }, { passive: true });
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-            
-            const mobileNow = window.innerWidth < 768;
-            CONFIG.cameraZ = mobileNow ? 35 : 28;
-            material.uniforms.uMobileOffsetY.value = mobileNow ? 4.5 : 0.0;
-        });
-
-        // --- ANIMATION LOOP ---
-        const clock = new THREE.Clock();
-        lucide.createIcons();
-        document.getElementById('year').textContent = new Date().getFullYear();
-        
-        setTimeout(() => document.getElementById('loader').style.opacity = '0', 800);
-        setTimeout(() => document.getElementById('loader').remove(), 1800);
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-            STATE.time += delta;
-
-            if (analyser) {
-                analyser.getByteFrequencyData(dataArray);
-                const avg = dataArray.reduce((a,b) => a+b, 0) / dataArray.length;
-                STATE.audioLevel += (avg / 255 - STATE.audioLevel) * 0.1;
-                material.uniforms.uAudio.value = STATE.audioLevel;
-            }
-
-            if (Math.abs(STATE.mode - STATE.targetMode) > 0.001) {
-                STATE.mode += (STATE.targetMode - STATE.mode) * 0.05;
-            } else {
-                STATE.mode = STATE.targetMode;
-            }
-            material.uniforms.uMode.value = STATE.mode;
-
-            material.uniforms.uTime.value = STATE.time;
-            finalPass.uniforms.uTime.value = STATE.time;
-
-            const lerpFactor = 0.1;
-            STATE.hands.left.pos.lerp(STATE.hands.left.target, lerpFactor);
-            STATE.hands.right.pos.lerp(STATE.hands.right.target, lerpFactor);
-
-            material.uniforms.uHandLeft.value.copy(STATE.hands.left.pos);
-            material.uniforms.uHandRight.value.copy(STATE.hands.right.pos);
-            material.uniforms.uHandLeftState.value = STATE.hands.left.state;
-            material.uniforms.uHandRightState.value = STATE.hands.right.state;
-
-            const targetC1 = palettes[STATE.colorPalette].c1;
-            const targetC2 = palettes[STATE.colorPalette].c2;
-            material.uniforms.uColor1.value.lerp(targetC1, 0.05);
-            material.uniforms.uColor2.value.lerp(targetC2, 0.05);
-
-            if (!STATE.hands.active) {
-                const zTarget = CONFIG.cameraZ + Math.sin(STATE.time * 0.5) * 2;
-                camera.position.z += (zTarget - camera.position.z) * 0.02;
-                camera.position.x = Math.sin(STATE.time * 0.2) * 2;
-                camera.position.y = Math.cos(STATE.time * 0.15) * 2;
-                camera.lookAt(0,0,0);
-            }
-
-            composer.render();
+        if (uHandRight.x < 90.0) {
+          float d = distance(pos, uHandRight);
+          float influence = smoothstep(12.0, 0.0, d);
+          if (uHandRightState < 0.0) {
+            pos = mix(pos, uHandRight, influence * 0.3);
+          } else {
+            pos += normalize(pos - uHandRight) * influence * 8.0;
+          }
         }
 
-        animate();
-    </script>
+        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+        gl_PointSize = (1.5 + aRandom.y * 2.0 + uAudio * 5.0) * (30.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
 
-</body></html>
+        vDist = length(pos);
+        // Fade distance follows the camera, so particles stay bright when the
+        // camera is pulled back on narrow (portrait) screens.
+        float depthFade = smoothstep(uFadeFar, 10.0, -mvPosition.z);
+        vAlpha = depthFade * (0.2 + aRandom.z * 0.6);
+        vColor = pos;
+      }
+    `;
+
+    const particleFragmentShader = `
+      uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      varying vec3 vColor;
+      varying float vAlpha;
+      varying float vDist;
+
+      void main() {
+        vec2 center = gl_PointCoord - 0.5;
+        float dist = length(center);
+        if (dist > 0.5) discard;
+
+        float glow = 1.0 - smoothstep(0.0, 0.5, dist);
+        glow = pow(glow, 1.5);
+
+        vec3 col = mix(uColor1, uColor2, smoothstep(-20.0, 20.0, vColor.x + vColor.y));
+
+        gl_FragColor = vec4(col, vAlpha * glow);
+      }
+    `;
+
+    const geometry = new THREE.BufferGeometry();
+    const indices = new Float32Array(CONFIG.particleCount);
+    const randoms = new Float32Array(CONFIG.particleCount * 3);
+
+    for (let i = 0; i < CONFIG.particleCount; i++) {
+      indices[i] = i;
+      randoms[i * 3]     = Math.random();
+      randoms[i * 3 + 1] = Math.random();
+      randoms[i * 3 + 2] = Math.random();
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(CONFIG.particleCount * 3).fill(0), 3));
+    geometry.setAttribute('aIndex', new THREE.BufferAttribute(indices, 1));
+    geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+
+    const palettes = [
+      { c1: new THREE.Color('#818cf8'), c2: new THREE.Color('#2dd4bf') },
+      { c1: new THREE.Color('#f472b6'), c2: new THREE.Color('#60a5fa') },
+      { c1: new THREE.Color('#fb923c'), c2: new THREE.Color('#e11d48') },
+    ];
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uMode: { value: 0 },
+        uFadeFar: { value: CONFIG.cameraZ + 32 },
+        uHandLeft: { value: new THREE.Vector3(-100, 0, 0) },
+        uHandRight: { value: new THREE.Vector3(100, 0, 0) },
+        uHandLeftState: { value: 0 },
+        uHandRightState: { value: 0 },
+        uAudio: { value: 0 },
+        uColor1: { value: palettes[0].c1.clone() },
+        uColor2: { value: palettes[0].c2.clone() }
+      },
+      vertexShader: particleVertexShader,
+      fragmentShader: particleFragmentShader,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    scene.add(points);
+
+    // --- AUDIO SYSTEM ---
+    let audioContext, analyser, dataArray;
+    const setupAudio = async () => {
+      if (audioContext) return;
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') await audioContext.resume();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        analyser.smoothingTimeConstant = 0.8;
+        source.connect(analyser);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        const btn = document.getElementById('btn-audio');
+        btn.classList.add('bg-white/10', 'border-white/20');
+        btn.querySelector('i, svg').classList.remove('text-white/60');
+        btn.querySelector('i, svg').classList.add('text-emerald-400');
+      } catch (e) {
+        audioContext = null;
+        console.error("Audio denied", e);
+      }
+    };
+
+    // --- HAND TRACKING SYSTEM ---
+    const initHandTracking = async () => {
+      const btn = document.getElementById('btn-cam');
+      const videoElement = document.getElementById('input-video');
+      const icon = () => btn.querySelector('i, svg');
+
+      icon().classList.add('animate-spin');
+
+      try {
+        const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: isMobile ? 0 : 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onHandsResults);
+
+        const cam = new window.Camera(videoElement, {
+          onFrame: async () => { await hands.send({ image: videoElement }); },
+          width: 640,
+          height: 480
+        });
+
+        await cam.start();
+
+        icon().classList.remove('animate-spin');
+        icon().classList.add('text-emerald-400');
+        document.getElementById('cam-active-indicator').classList.remove('opacity-0');
+
+      } catch (err) {
+        console.error("Camera Init Error:", err);
+        icon().classList.remove('animate-spin');
+        alert("Could not access camera. Please allow permissions.");
+      }
+    };
+
+    function onHandsResults(results) {
+      STATE.hands.active = false;
+
+      if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+        STATE.hands.left.target.set(-100, 0, 0);
+        STATE.hands.right.target.set(100, 0, 0);
+        document.getElementById('hand-status').classList.add('opacity-0');
+      } else {
+        STATE.hands.active = true;
+        document.getElementById('hand-status').classList.remove('opacity-0');
+
+        const { halfW, halfH } = getVisibleExtents();
+
+        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+          const landmarks = results.multiHandLandmarks[i];
+          const handedness = results.multiHandedness[i].label;
+
+          // Map camera coordinates to what is actually visible on this screen
+          const x = (0.5 - landmarks[9].x) * 2 * halfW * 0.9;
+          const y = (0.5 - landmarks[9].y) * 2 * halfH * 0.9;
+          const z = -landmarks[9].z * 30;
+
+          const thumbTip = landmarks[4];
+          const indexTip = landmarks[8];
+          const pinchDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+          const state = pinchDist < 0.05 ? -1.0 : 1.0;
+
+          if (handedness === 'Right') {
+            STATE.hands.right.target.set(x, y, z);
+            STATE.hands.right.state = state;
+          } else {
+            STATE.hands.left.target.set(x, y, z);
+            STATE.hands.left.state = state;
+          }
+        }
+      }
+    }
+
+    // --- INTERACTION LOGIC ---
+    window.setMode = (idx) => {
+      STATE.targetMode = idx;
+      document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+        const label = btn.querySelector('span:first-child');
+        if (i === idx) {
+          btn.classList.add('active', 'bg-white/10');
+          btn.classList.remove('bg-transparent');
+          label.classList.add('text-white');
+          label.classList.remove('text-white/60');
+        } else {
+          btn.classList.remove('active', 'bg-white/10');
+          btn.classList.add('bg-transparent');
+          label.classList.remove('text-white');
+          label.classList.add('text-white/60');
+        }
+      });
+      const names = ['NEBULA CLOUD', 'QUANTUM TORUS', 'CYBER LATTICE', 'WARP VORTEX'];
+      const simEl = document.getElementById('sim-mode');
+      if (simEl) simEl.innerText = names[idx];
+    };
+
+    window.cycleColor = (idx) => { STATE.colorPalette = idx; };
+
+    // --- EVENTS ---
+    document.getElementById('btn-audio').onclick = setupAudio;
+    document.getElementById('btn-cam').onclick = initHandTracking;
+    document.getElementById('btn-rec').onclick = () => {
+      composer.render();
+      const link = document.createElement('a');
+      link.download = `aldolienopianto-${Date.now()}.png`;
+      link.href = renderer.domElement.toDataURL('image/png');
+      link.click();
+    };
+
+    // Pointer events cover mouse AND touch, so particles also react on phones
+    const updatePointerTarget = (e) => {
+      if (STATE.hands.active) return;
+      const { halfW, halfH } = getVisibleExtents();
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = -(e.clientY / window.innerHeight) * 2 + 1;
+      STATE.hands.right.target.set(nx * halfW, ny * halfH, 0);
+    };
+    window.addEventListener('pointermove', updatePointerTarget);
+    window.addEventListener('pointerdown', updatePointerTarget);
+    const releasePointer = (e) => {
+      // Touch has no hover: release the particles when the finger lifts
+      if (e.pointerType !== 'mouse' && !STATE.hands.active) STATE.hands.right.target.set(100, 0, 0);
+    };
+    window.addEventListener('pointerup', releasePointer);
+    window.addEventListener('pointercancel', releasePointer);
+
+    const onResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      composer.setSize(w, h);
+      CONFIG.cameraZ = getCameraZ();
+      material.uniforms.uFadeFar.value = CONFIG.cameraZ + 32;
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', () => setTimeout(onResize, 250));
+
+    // --- ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+    if (window.lucide) lucide.createIcons();
+
+    setTimeout(() => { const l = document.getElementById('loader'); if (l) l.style.opacity = '0'; }, 800);
+    setTimeout(() => { const l = document.getElementById('loader'); if (l) l.remove(); }, 1800);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      STATE.time += delta;
+
+      if (analyser) {
+        analyser.getByteFrequencyData(dataArray);
+        const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+        STATE.audioLevel += (avg / 255 - STATE.audioLevel) * 0.1;
+        material.uniforms.uAudio.value = STATE.audioLevel;
+      }
+
+      if (Math.abs(STATE.mode - STATE.targetMode) > 0.001) {
+        STATE.mode += (STATE.targetMode - STATE.mode) * 0.05;
+      } else {
+        STATE.mode = STATE.targetMode;
+      }
+      material.uniforms.uMode.value = STATE.mode;
+
+      material.uniforms.uTime.value = STATE.time;
+      finalPass.uniforms.uTime.value = STATE.time;
+
+      const lerpFactor = 0.1;
+      STATE.hands.left.pos.lerp(STATE.hands.left.target, lerpFactor);
+      STATE.hands.right.pos.lerp(STATE.hands.right.target, lerpFactor);
+
+      material.uniforms.uHandLeft.value.copy(STATE.hands.left.pos);
+      material.uniforms.uHandRight.value.copy(STATE.hands.right.pos);
+      material.uniforms.uHandLeftState.value = STATE.hands.left.state;
+      material.uniforms.uHandRightState.value = STATE.hands.right.state;
+
+      const targetC1 = palettes[STATE.colorPalette].c1;
+      const targetC2 = palettes[STATE.colorPalette].c2;
+      material.uniforms.uColor1.value.lerp(targetC1, 0.05);
+      material.uniforms.uColor2.value.lerp(targetC2, 0.05);
+
+      if (!STATE.hands.active) {
+        const zTarget = CONFIG.cameraZ + Math.sin(STATE.time * 0.5) * 2;
+        camera.position.z += (zTarget - camera.position.z) * 0.02;
+        camera.position.x = Math.sin(STATE.time * 0.2) * 2;
+        camera.position.y = Math.cos(STATE.time * 0.15) * 2;
+        camera.lookAt(0, 0, 0);
+      }
+
+      composer.render();
+    }
+
+    animate();
+  </script>
+</body>
+</html>
+```[cite: 1]
