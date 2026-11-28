@@ -133,11 +133,17 @@ tailwind.config = {
     .ui-header { padding-top: max(0.5rem, env(safe-area-inset-top)) !important; padding-bottom: 0.25rem !important; }
     .ui-sub { display: none !important; }
     .ui-header button { width: 2rem !important; height: 2rem !important; }
-    .hero-main { padding-bottom: 1.5rem !important; }
-    .hero-title { font-size: clamp(1.1rem, 6.4vh, 2rem) !important; padding-bottom: 0 !important; }
+    /* Two columns: headline + buttons on the left, description on the right.
+       Halves the height needed, so the description is never dropped. */
+    .hero-main { padding-bottom: 1.5rem !important; justify-content: flex-start !important;
+                 overflow-y: auto !important; pointer-events: auto; touch-action: pan-y; }
+    .hero-inner { display: grid !important; grid-template-columns: 1.1fr 1fr; grid-template-areas: "title copy" "actions copy";
+                  column-gap: 1.75rem; row-gap: 0.75rem; align-items: center; text-align: left !important;
+                  max-width: 56rem !important; width: 100%; margin-top: auto !important; margin-bottom: auto !important; }
+    .hero-title { grid-area: title; align-self: end; font-size: clamp(1.1rem, 6.4vh, 2rem) !important; padding-bottom: 0 !important; }
     .hero-title br { display: none !important; }
-    .hero-copy { font-size: clamp(0.68rem, 3.4vh, 0.85rem) !important; margin-top: 0.5rem !important; line-height: 1.45 !important; }
-    .hero-actions { margin-top: 0.75rem !important; }
+    .hero-copy { grid-area: copy; align-self: center; font-size: clamp(0.7rem, 3.4vh, 0.85rem) !important; margin-top: 0 !important; line-height: 1.5 !important; max-width: none !important; }
+    .hero-actions { grid-area: actions; align-self: start; justify-content: flex-start !important; margin-top: 0 !important; }
     .hero-actions button { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
 
     /* Footer floats at the bottom edge and takes no layout space */
@@ -153,11 +159,6 @@ tailwind.config = {
     .mode-num, .copy-extra { display: none !important; }
     .side-col { flex-direction: row !important; align-items: center !important; justify-content: flex-end !important; gap: 0.75rem !important; margin-left: auto; }
   }
-  /* Very short: drop the paragraph so the headline and buttons always fit */
-  @media (max-height: 300px) {
-    .hero-copy { display: none !important; }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .loader-ring { animation: none; }
   }
@@ -212,7 +213,7 @@ tailwind.config = {
 
     <!-- Hero: fills the space between header and controls, content is centered in it -->
     <main class="hero-main flex-1 min-h-0 flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden">
-      <div class="flex flex-col items-center text-center max-w-5xl mx-auto">
+      <div class="hero-inner flex flex-col items-center text-center max-w-5xl mx-auto">
         <h2 class="hero-title font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white/90 to-white/40 pb-1 leading-[1.12]">
           Strategic vision, thoughtful design,<br class="hidden md:block"> and reliable engineering
         </h2>
